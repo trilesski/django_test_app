@@ -36,7 +36,7 @@ async def main(cnt=100):
 
     timeout = httpx.Timeout(5.0, pool=None)
     async with httpx.AsyncClient(timeout=timeout) as client:
-        res = await client.post("http://0.0.0.0:8000/api/token/", json={"username": "root", "password": "381989"})
+        res = await client.post("http://0.0.0.0:8080/api/token/", json={"username": "test", "password": "test_pwd"})
         headers['Authorization'] = 'Bearer {}'.format(res.json().get('access'))
         # Create a list of coroutines
         tasks = []
@@ -44,7 +44,7 @@ async def main(cnt=100):
         for x in range(cnt):
             d = data.copy()
             d["name"] = f"Survey {x}"
-            tasks.append(client.post("http://127.0.0.1:8000/api/surveys/", json=d, headers=headers))
+            tasks.append(client.post("http://0.0.0.0:8080/api/surveys/", json=d, headers=headers))
         
         results = []
         # Execute concurrently and wait for all responses
