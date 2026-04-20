@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata/
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=pg
+      - POSTGRES_PASSWORD=pwd
+      - POSTGRES_DB=test_db
+    volumes:
+      - postgres:/var/lib/postgresql/data/pgdata/:cached
+      - ./deploy/postgresql.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:8.6.2-alpine
+    volumes:
+      - redis:/data/
+    hostname: redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+
+  app:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    command: ./manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/sources:cached
+      - /tmp/url-shortener-3000:/tmp
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - 8080:8080
+    env_file: deploy/dev.env
+
+volumes:
+  postgres:
+  redis:
